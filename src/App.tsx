@@ -1,104 +1,37 @@
+// src/App.tsx
 import { useRef, useState } from 'react';
 import { IRefPhaserGame, PhaserGame } from './game/PhaserGame';
-import { MainMenu } from './game/scenes/MainMenu';
+import { EventBus } from './game/EventBus';
+import { LoginOverlay } from '@/ui/LoginOverlay';
+import { MainGui } from '@/ui/MainGui';
 
-function App()
-{
-    // The sprite can only be moved in the MainMenu Scene
-    const [canMoveSprite, setCanMoveSprite] = useState(true);
+function App() {
+  const phaserRef = useRef<IRefPhaserGame | null>(null);
+  const [currentSceneKey, setCurrentSceneKey] = useState<string>('');
 
-    //  References to the PhaserGame component (game and scene are exposed)
-    const phaserRef = useRef<IRefPhaserGame | null>(null);
-    const [spritePosition, setSpritePosition] = useState({ x: 0, y: 0 });
+  // Listen for scene changes:
+  const onSceneReady = (scene: Phaser.Scene) => {
+    setCurrentSceneKey(scene.scene.key);
+  };
 
-    const changeScene = () => {
+  return (
+    <div id="app">
+      {/* This renders Phaser in a <div id="game-container"> */}
+      <PhaserGame ref={phaserRef} currentActiveScene={onSceneReady} />
 
-        if(phaserRef.current)
-        {     
-            const scene = phaserRef.current.scene as MainMenu;
-            
-            if (scene)
-            {
-                scene.changeScene();
-            }
-        }
-    }
+      {/*
+        If we are in the "LoginScene", show a React overlay with a Shadcn Input
+        otherwise show the main GUI if we’re in the “NextScene” (the “Main” scene).
+      */}
+      {currentSceneKey === 'LoginScene' && (
+        <LoginOverlay />
+      )}
 
-    const moveSprite = () => {
-
-        if(phaserRef.current)
-        {
-
-            const scene = phaserRef.current.scene as MainMenu;
-
-            if (scene && scene.scene.key === 'MainMenu')
-            {
-                // Get the update logo position
-                scene.moveLogo(({ x, y }) => {
-
-                    setSpritePosition({ x, y });
-
-                });
-            }
-        }
-
-    }
-
-    const addSprite = () => {
-
-        if (phaserRef.current)
-        {
-            const scene = phaserRef.current.scene;
-
-            if (scene)
-            {
-                // Add more stars
-                const x = Phaser.Math.Between(64, scene.scale.width - 64);
-                const y = Phaser.Math.Between(64, scene.scale.height - 64);
-    
-                //  `add.sprite` is a Phaser GameObjectFactory method and it returns a Sprite Game Object instance
-                const star = scene.add.sprite(x, y, 'star');
-    
-                //  ... which you can then act upon. Here we create a Phaser Tween to fade the star sprite in and out.
-                //  You could, of course, do this from within the Phaser Scene code, but this is just an example
-                //  showing that Phaser objects and systems can be acted upon from outside of Phaser itself.
-                scene.add.tween({
-                    targets: star,
-                    duration: 500 + Math.random() * 1000,
-                    alpha: 0,
-                    yoyo: true,
-                    repeat: -1
-                });
-            }
-        }
-    }
-
-    // Event emitted from the PhaserGame component
-    const currentScene = (scene: Phaser.Scene) => {
-
-        setCanMoveSprite(scene.scene.key !== 'MainMenu');
-        
-    }
-
-    return (
-        <div id="app">
-            <PhaserGame ref={phaserRef} currentActiveScene={currentScene} />
-            <div>
-                <div>
-                    <button className="button" onClick={changeScene}>Change Scene</button>
-                </div>
-                <div>
-                    <button disabled={canMoveSprite} className="button" onClick={moveSprite}>Toggle Movement</button>
-                </div>
-                <div className="spritePosition">Sprite Position:
-                    <pre>{`{\n  x: ${spritePosition.x}\n  y: ${spritePosition.y}\n}`}</pre>
-                </div>
-                <div>
-                    <button className="button" onClick={addSprite}>Add New Sprite</button>
-                </div>
-            </div>
-        </div>
-    )
+      {currentSceneKey === 'NextScene' && (
+        <MainGui />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
