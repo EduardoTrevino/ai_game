@@ -1,59 +1,111 @@
 // src/ui/LoginOverlay.tsx
-import React, { useState, FormEvent } from 'react';
-import { Input } from "@/components/ui/input"    // Example import path
-import { Button } from "@/components/ui/button"
-import { EventBus } from '../game/EventBus';
+
+import React, { useState, FormEvent } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { EventBus } from "../game/EventBus";
 
 export function LoginOverlay() {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    // Emit an event so the LoginScene can catch it (or do a direct call to scene? Up to you)
-    EventBus.emit('login-submitted', username);
+    EventBus.emit("login-submitted", username);
   };
 
   return (
-    <div style={overlayStyles}>
-      <form onSubmit={handleSubmit} style={formStyles}>
-        <label style={labelStyles}>Sign in with your username:</label>
+    <div
+      className="
+        fixed 
+        inset-0 
+        z-50 
+        flex 
+        items-center 
+        justify-center
+      "
+      style={{
+        // 1) Repeating money-bag emoji in the background:
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='0' y='30' font-size='30'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E")`,
+        backgroundRepeat: "repeat",
+      }}
+    >
+      {/* 2) Semi-transparent overlay to soften the emojis */}
+      <div className="absolute inset-0 bg-white/70 backdrop-blur-sm" />
+
+      {/* 3) Foreground form container */}
+      <form
+        onSubmit={handleSubmit}
+        className="
+          relative
+          z-10 
+          w-full 
+          max-w-sm 
+          rounded-xl 
+          bg-white 
+          dark:bg-gray-900 
+          shadow-xl 
+          p-6 
+          flex 
+          flex-col 
+          items-center 
+          space-y-4
+        "
+      >
+        {/* Big Cartoonish Game Title */}
+        <h1
+          className="
+            text-5xl 
+            font-extrabold 
+            text-center
+            leading-tight
+            bg-gradient-to-r
+            from-pink-400
+            to-orange-400
+            text-transparent
+            bg-clip-text
+            drop-shadow-md
+          "
+        >
+          Zero to Zillion!
+        </h1>
+
+        {/* Subtitle or label for the input */}
+        <label
+          className="
+            text-sm 
+            font-medium 
+            text-gray-700 
+            dark:text-gray-300
+          "
+        >
+          Enter Your Username
+        </label>
+
         <Input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Type username..."
+          className="w-full"
         />
-        <Button type="submit" style={{ marginTop: '10px' }}>
-          Enter
+
+        {/* Play Button */}
+        <Button
+          type="submit"
+          className="
+            w-full
+            bg-gradient-to-r
+            from-violet-600
+            to-indigo-600
+            text-white
+            hover:from-violet-700
+            hover:to-indigo-700
+            font-bold
+            text-lg
+          "
+        >
+          Play
         </Button>
       </form>
     </div>
   );
 }
-
-// Some inline styles to overlay on top of Phaser:
-const overlayStyles: React.CSSProperties = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
-  // White background slightly transparent:
-  background: 'rgba(255,255,255,0.8)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  zIndex: 10 // ensure it sits above the Phaser canvas
-};
-
-const formStyles: React.CSSProperties = {
-  background: '#fff',
-  padding: '20px',
-  borderRadius: '8px',
-  boxShadow: '0 0 10px rgba(0,0,0,0.3)'
-};
-
-const labelStyles: React.CSSProperties = {
-  display: 'block',
-  marginBottom: '8px',
-  color: '#000'
-};

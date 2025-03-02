@@ -4,6 +4,7 @@ import { IRefPhaserGame, PhaserGame } from './game/PhaserGame';
 import { EventBus } from './game/EventBus';
 import { LoginOverlay } from '@/ui/LoginOverlay';
 import { MainGui } from '@/ui/MainGui';
+import Dashboard from '@/ui/Dashboard';
 
 function App() {
   const phaserRef = useRef<IRefPhaserGame | null>(null);
@@ -28,7 +29,7 @@ function App() {
       )}
 
       {currentSceneKey === 'NextScene' && (
-        <MainGui />
+        <Dashboard />
       )}
     </div>
   );
